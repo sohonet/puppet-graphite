@@ -129,21 +129,22 @@ class graphite::install inherits graphite::params {
     # hack unusual graphite install target
     $carbon = "\"carbon-\"*\"-py${::graphite::params::pyver}.egg-info\""
     $gweb = "\"graphite_web-\"*\"-py${::graphite::params::pyver}.egg-info\""
-    create_resources('exec', {
-      'carbon_hack' => {
-        command => "ln -s \"${::graphite::base_dir_REAL}/lib/\"${carbon} \"${::graphite::params::libpath}/\""
-      }
-      ,
-      'gweb_hack'   => {
-        command => "ln -s \"${::graphite::base_dir_REAL}/webapp/\"${gweb} \"${::graphite::params::libpath}/\""
-      }
-      ,
-    }
-    , {
+
+    file { 'carbon_hack':
+      ensure      => link,
+      path        => "${::graphite::params::libpath}/${carbon}",
+      target      => "${::graphite::base_dir_REAL}/lib/${carbon}",
       refreshonly => true,
       subscribe   => Package['carbon', 'graphite-web', 'whisper'],
-      provider    => 'shell',
     }
-    )
+
+    file { 'gweb_hack':
+      ensure      => link,
+      path        => "${::graphite::params::libpath}/${gweb}",
+      target      => "${::graphite::base_dir_REAL}/webapp/${gweb}",
+      refreshonly => true,
+      subscribe   => Package['carbon', 'graphite-web', 'whisper'],
+    }
+
   }
 }
